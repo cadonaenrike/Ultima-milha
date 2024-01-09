@@ -1,14 +1,22 @@
 // app/App.tsx
 import React from "react";
 import { View } from "react-native";
-import StyledComponent from "./components/StyledComponent";
 import LoginComponent from "./components/LoginComponent";
 import NavBar from "./components/NavBarComponent";
+import HomePage from "./pages/home";
+import Progresso from "./pages/progresso";
 
 const App: React.FC = () => {
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <LoginComponent />
+    <View
+      style={{
+        flex: 1,
+        margin: 20,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Progresso />
       <NavBar />
     </View>
   );
