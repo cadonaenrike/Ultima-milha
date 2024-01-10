@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Icon from "react-native-vector-icons/Ionicons";
 import {
   View,
@@ -7,39 +7,72 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { PieChart } from "react-native-gifted-charts";
-import { BarChart } from "react-native-gifted-charts";
+import { PieChart, BarChart } from "react-native-gifted-charts";
+
+interface PieChartData {
+  value: number;
+  color: string;
+}
+
+interface LegendData {
+  text: string;
+  color: string;
+}
+
+interface BarData {
+  value: number;
+  label: string;
+  frontColor?: string;
+}
 
 const Progresso = () => {
-  const pieChartData = [
-    { value: 0.5, color: "#FFFFFF" },
-    { value: 32, color: "#FFA15B" },
-    // Simulando borda branca
-    { value: 0.5, color: "#FFFFFF" },
-    { value: 32, color: "#6665DD" },
-    // Simulando borda branca
-    { value: 0.5, color: "#FFFFFF" },
-    { value: 27.5, color: "#34D1BF" },
-  ];
+  const [pieChartData, setPieChartData] = useState<Array<PieChartData>>([]);
+  const [legendData, setLegendData] = useState<Array<LegendData>>([]);
+  const [barData, setBarData] = useState<Array<BarData>>([]);
 
-  const legendData = [
-    { text: "PRODUTOS", color: "#FFA15B" },
-    { text: "02", color: "#6665DD" },
-    { text: "03", color: "#34D1BF" },
-  ];
-  const barData = [
-    { value: 250, label: "M" },
-    { value: 500, label: "T", frontColor: "#177AD5" },
-    { value: 745, label: "W", frontColor: "#177AD5" },
-    { value: 320, label: "T" },
-    { value: 600, label: "F", frontColor: "#177AD5" },
-    { value: 256, label: "S" },
-    { value: 300, label: "S" },
-  ];
+  useEffect(() => {
+    // Simulando o carregamento de dados da API
+    const fetchChartData = async () => {
+      // Substitua os dados abaixo pelos dados da sua API
+      const pieDataFromAPI = [
+        { value: 0.5, color: "#FFFFFF" },
+        { value: 32, color: "#FFA15B" },
+        { value: 0.5, color: "#FFFFFF" },
+        { value: 32, color: "#6665DD" },
+        { value: 0.5, color: "#FFFFFF" },
+        { value: 27.5, color: "#34D1BF" },
+      ];
 
-  const renderLegend = (item: any) => {
+      const legendDataFromAPI = [
+        { text: "PRODUTOS", color: "#FFA15B" },
+        { text: "02", color: "#6665DD" },
+        { text: "03", color: "#34D1BF" },
+      ];
+
+      const barDataFromAPI = [
+        { value: 250, label: "M" },
+        { value: 500, label: "T", frontColor: "#177AD5" },
+        { value: 745, label: "W", frontColor: "#177AD5" },
+        { value: 320, label: "T" },
+        { value: 600, label: "F", frontColor: "#177AD5" },
+        { value: 256, label: "S" },
+        { value: 300, label: "S" },
+      ];
+
+      setPieChartData(pieDataFromAPI);
+      setLegendData(legendDataFromAPI);
+      setBarData(barDataFromAPI);
+    };
+
+    fetchChartData();
+  }, []);
+
+  const renderLegend = (item: LegendData, index: number) => {
     return (
-      <View style={[styles.legendItem, { backgroundColor: item.color }]}>
+      <View
+        style={[styles.legendItem, { backgroundColor: item.color }]}
+        key={index}
+      >
         <Text style={styles.legendText}>{item.text}</Text>
       </View>
     );
@@ -65,23 +98,19 @@ const Progresso = () => {
           )}
         />
         <View style={styles.legendContainer}>
-          {legendData.map((item) => renderLegend(item))}
+          {legendData.map((item, index) => renderLegend(item, index))}
         </View>
       </View>
       <View style={styles.container}>
-        {/* Seção de Vendas com Botões */}
         <View style={styles.salesSection}>
           <TouchableOpacity style={styles.arrowButton}>
             <Icon name="arrow-back" size={20} color="#121212" />
           </TouchableOpacity>
-
           <Text style={styles.headerText}>Vendas total</Text>
-
           <TouchableOpacity style={styles.arrowButton}>
             <Icon name="arrow-forward" size={20} color="#121212" />
           </TouchableOpacity>
         </View>
-
         <BarChart
           height={90}
           barWidth={8}
@@ -103,7 +132,7 @@ const styles = StyleSheet.create({
     marginVertical: 55,
   },
   container: {
-    margin: 10,
+    margin: 6,
     width: "90%",
     alignSelf: "center",
     borderRadius: 16,
@@ -117,7 +146,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     padding: 20,
   },
-
   salesSection: {
     flexDirection: "row",
     marginVertical: 28,
@@ -125,7 +153,6 @@ const styles = StyleSheet.create({
   arrowButton: {
     paddingHorizontal: 30,
   },
-
   headerText: {
     color: "#414D55",
     fontSize: 19,
@@ -133,7 +160,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     letterSpacing: 0.01,
     textAlign: "center",
-    marginBottom: 25,
+    marginBottom: 20,
   },
   centerNumber: {
     color: "#414D55",
@@ -154,11 +181,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "flex-start",
     marginLeft: 10,
-    marginTop: 22,
+    marginTop: 15,
   },
   legendItem: {
     height: 20,
-
     flexShrink: 0,
     borderRadius: 4,
     marginRight: 10,

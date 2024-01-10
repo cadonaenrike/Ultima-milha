@@ -1,21 +1,39 @@
 import React from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
+interface Button {
+  iconName: string;
+  text: string;
+  screen: string;
+}
 
 const NavBar: React.FC = () => {
+  const navigation = useNavigation();
+
   const buttons = [
-    { iconName: "home-outline", text: "Home" },
-    { iconName: "ios-stats-chart-outline", text: "Progresso" },
-    { iconName: "ios-time-outline", text: "Visitas" },
-    { iconName: "ios-notifications-outline", text: "Notificações" },
-    { iconName: "ios-person-outline", text: "Perfil" },
+    { iconName: "home-outline", text: "Home", screen: "Home" },
+    {
+      iconName: "ios-stats-chart-outline",
+      text: "Progresso",
+      screen: "Progresso",
+    },
+    { iconName: "ios-time-outline", text: "Visitas", screen: "Visitas" },
+    {
+      iconName: "ios-notifications-outline",
+      text: "Notificações",
+      screen: "Notificacoes",
+    },
+    { iconName: "ios-person-outline", text: "Perfil", screen: "Perfil" },
   ];
 
-  const renderButton = (
-    button: { iconName: string; text: string },
-    index: number
-  ) => (
-    <TouchableOpacity key={index} style={styles.button}>
+  const renderButton = (button: Button, index: number) => (
+    <TouchableOpacity
+      key={index}
+      style={styles.button}
+      //@ts-ignore
+      onPress={() => navigation.navigate(button.screen)}
+    >
       <Icon name={button.iconName} size={25} color="#000" />
       <Text style={styles.buttonText}>{button.text}</Text>
     </TouchableOpacity>
@@ -33,7 +51,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    height: 80,
+    height: 60,
     backgroundColor: "#fff",
   },
   button: {

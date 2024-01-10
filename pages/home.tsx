@@ -6,15 +6,99 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  Platform,
+  Alert,
 } from "react-native";
 import Swiper from "react-native-swiper";
 import Icon from "react-native-vector-icons/Ionicons";
+import * as Linking from "expo-linking";
+import * as Location from "expo-location";
 
-const HomePage: React.FC = () => {
+export const HomePage: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [coordinates, setCoordinates] = useState({
+    latitude: 37.48484,
+    longitude: -122.148386,
+  });
 
+  // Simulando uma chamada de API para buscar as coordenadas
+  const fetchCoordinates = async () => {
+    try {
+      // Substitua pela URL da sua API e pelos parâmetros necessários
+      const response = await fetch(
+        "https://sua-api.com/endpoint-de-coordenadas"
+      );
+      const data = await response.json();
+
+      // Substitua 'data.lat' e 'data.lng' pelos caminhos reais no seu objeto de resposta
+      setCoordinates({ latitude: data.lat, longitude: data.lng });
+    } catch (error) {
+      Alert.alert(
+        "Erro",
+        //@ts-ignore
+        "Não foi possível buscar as coordenadas: " + error.message
+      );
+    }
+  };
   const toggleModal = () => {
     setModalVisible(!modalVisible);
+  };
+  const handleOpenMaps = async () => {
+    // Verifica se as coordenadas já foram buscadas
+    if (!coordinates) {
+      await fetchCoordinates();
+    }
+
+    // Verifica se as coordenadas são válidas
+    if (coordinates && coordinates.latitude && coordinates.longitude) {
+      const { latitude, longitude } = coordinates;
+      const scheme = Platform.OS === "ios" ? "maps:" : "geo:";
+      const url = `${scheme}${latitude},${longitude}`;
+
+      try {
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+          await Linking.openURL(url);
+        } else {
+          Alert.alert("Erro", "Não foi possível abrir o mapa");
+        }
+      } catch (error) {
+        Alert.alert("Erro", "Ocorreu um erro ao tentar abrir o mapa");
+      }
+    } else {
+      // Se as coordenadas não forem válidas, informa o usuário
+      Alert.alert("Erro", "Coordenadas não disponíveis");
+    }
+  };
+  const handleCheckIn = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permissão necessária",
+        "Este aplicativo precisa de permissão de acesso à localização para fazer check-in."
+      );
+      return;
+    }
+
+    try {
+      const location = await Location.getCurrentPositionAsync({});
+      const checkInData = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        timestamp: new Date(location.timestamp), // ou simplesmente new Date() para a hora atual
+      };
+
+      // Aqui você pode fazer o que precisa com as coordenadas e o timestamp
+      // Por exemplo, enviá-los para uma API ou armazená-los localmente
+      console.log(checkInData);
+
+      Alert.alert("Check-in", "Check-in realizado com sucesso!");
+    } catch (error) {
+      Alert.alert(
+        "Erro",
+        "Não foi possível obter a localização para check-in."
+      );
+    }
   };
   return (
     <View style={styles.container}>
@@ -83,10 +167,16 @@ const HomePage: React.FC = () => {
               </TouchableOpacity>
             </View>
             <Text style={styles.modalSubtitle}>Supermercado X</Text>
-            <TouchableOpacity style={styles.modalButtonEndereco}>
+            <TouchableOpacity
+              style={styles.modalButtonEndereco}
+              onPress={handleOpenMaps}
+            >
               <Text style={styles.modalButtonText}>Ver endereço</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={handleCheckIn}
+            >
               <Text style={styles.modalButtonText}>Fazer check-in</Text>
             </TouchableOpacity>
           </View>
@@ -261,5 +351,3 @@ const styles = StyleSheet.create({
     fontWeight: "300",
   },
 });
-
-export default HomePage;
